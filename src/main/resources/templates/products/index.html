@@ -42,7 +42,7 @@
 
                     <td th:text="${product.createdAt.toString().substring(0,10)}"></td>
                     <td style="white-space:nowrap">
-                        <a class="btn btn-primary btn-sm" th:href="@{/products/edit(id=${product.id})}">Edit</a>
+                        <a class="btn btn-primary btn-sm" th:href="@{/products/edit/{id}(id=${product.id})}">Edit</a>
                         <a class="btn btn-danger btn-sm" th:href="@{/products/delete(id=${product.id})}"
                             onClick="return confirm('Are you sure?')">Delete</a>
 
