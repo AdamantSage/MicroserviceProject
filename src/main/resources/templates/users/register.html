@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>User Registration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px auto;
+            max-width: 400px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            position: relative;
+        }
+        h2 {
+            text-align: center;
+        }
+        form div {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+        }
+        .error {
+            color: red;
+            font-size: 0.9em;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #2e8b57;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #267349;
+        }
+        
+        /* Popup styles */
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+            z-index: 1000;
+            display: none;
+            width: 300px;
+            text-align: center;
+        }
+        .success-popup {
+            background-color: #dff0d8;
+            border: 1px solid #d6e9c6;
+            color: #3c763d;
+        }
+        .error-popup {
+            background-color: #f2dede;
+            border: 1px solid #ebccd1;
+            color: #a94442;
+        }
+        .popup-btn {
+            margin-top: 15px;
+            padding: 5px 15px;
+            background-color: #337ab7;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 999;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h2>Register</h2>
+    
+    <!-- Success Popup -->
+    <div id="successPopup" class="popup success-popup">
+        <h3>Success!</h3>
+        <p>User has been created successfully.</p>
+        <button class="popup-btn" onclick="redirectToLogin()">OK</button>
+    </div>
+    
+    <!-- Error Popup -->
+    <div id="errorPopup" class="popup error-popup">
+        <h3>Error</h3>
+        <p id="errorMessage">An error occurred while registering the user.</p>
+        <button class="popup-btn" onclick="closePopup('errorPopup')">OK</button>
+    </div>
+    
+    <!-- Background Overlay -->
+    <div id="overlay" class="overlay"></div>
+    
+    <!-- Registration Form -->
+    <form th:action="@{/register}" method="post" th:object="${userDto}" id="registrationForm">
+        <div>
+            <label for="username">Username:</label>
+            <input type="text" id="username" th:field="*{username}" required />
+            <p class="error" th:if="${#fields.hasErrors('username')}" th:errors="*{username}">Invalid username</p>
+        </div>
+
+        <div>
+            <label for="password">Password:</label>
+            <input type="password" id="password" th:field="*{password}" required />
+            <p class="error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">Invalid password</p>
+        </div>
+
+        <div>
+            <label for="role">Role:</label>
+            <select id="role" th:field="*{role}" required>
+                <option value="" disabled selected>Select role</option>
+                <option value="USER">User</option>
+                <option value="ADMIN">Admin</option>
+            </select>
+            <p class="error" th:if="${#fields.hasErrors('role')}" th:errors="*{role}">Invalid role</p>
+        </div>
+
+        <button type="submit">Register</button>
+    </form>
+    
+    <script th:inline="javascript">
+        // Check for status parameter in the URL
+        window.onload = function() {
+            // Check if there was an error message from the server
+            const serverError = /*[[${error}]]*/ null;
+            if (serverError) {
+                document.getElementById('errorMessage').textContent = serverError;
+                showPopup('errorPopup');
+            }
+            
+            // Check for URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const status = urlParams.get('status');
+            
+            if (status === 'success') {
+                showPopup('successPopup');
+            }
+        };
+        
+        // Show a popup
+        function showPopup(popupId) {
+            document.getElementById(popupId).style.display = 'block';
+            document.getElementById('overlay').style.display = 'block';
+        }
+        
+        // Close a popup
+        function closePopup(popupId) {
+            document.getElementById(popupId).style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
+        }
+        
+        // Redirect to login page
+        function redirectToLogin() {
+            window.location.href = /*[[@{/login}]]*/ '/login';
+        }
+        
+        // Submit form via AJAX
+        document.getElementById('registrationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            fetch(this.action, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.redirected) {
+                    // Show success popup before redirecting
+                    showPopup('successPopup');
+                    return null;
+                } else {
+                    return response.text();
+                }
+            })
+            .catch(error => {
+                document.getElementById('errorMessage').textContent = "An error occurred: " + error.message;
+                showPopup('errorPopup');
+            });
+        });
+    </script>
+</body>
+</html>
