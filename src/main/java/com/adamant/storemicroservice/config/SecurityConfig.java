@@ -25,11 +25,11 @@ public class SecurityConfig {
             )
             .formLogin(form -> form
             .loginPage("/login")
-            .defaultSuccessUrl("/products",true)
+            .defaultSuccessUrl("/login?loginSuccess=true",true)
             .permitAll()
             )
             .logout(logout -> logout
-            .logoutSuccessUrl("/login?logout")
+            .logoutSuccessUrl("/login?logout=true")
             .permitAll()
         );
         return http.build();
