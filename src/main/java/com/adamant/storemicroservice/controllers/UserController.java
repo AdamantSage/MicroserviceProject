@@ -3,7 +3,6 @@ package com.adamant.storemicroservice.controllers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -11,14 +10,12 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.adamant.storemicroservice.models.User;
 import com.adamant.storemicroservice.models.UserDto;
 import com.adamant.storemicroservice.services.UserRepository;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
@@ -40,6 +37,14 @@ public class UserController {
         logger.debug("Showing login page");
         return "users/sign-up";
     }
+
+
+    @GetMapping("/home")
+    public String showHomePage() {
+        logger.debug("Showing home page");
+        return "users/home";
+    }
+    
 
     @GetMapping("/register")
     public String showRegisterPage(Model model) {
