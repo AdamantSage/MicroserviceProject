@@ -1,24 +1,240 @@
-<!doctype html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org"
-      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
-  <head>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
     <meta charset="utf-8">
+    <title>SecureStore | Home</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Secure Store</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-  </head>
-  <body>
-   <div class ="container">
-    <h1 class= "text-center my-4"> Welcome to our website</h1>
-    <h2 th:inline="text"> Dear <span th:remove="tag"
-    sec:authentication="name">thymeleaf</span>!</span></h2>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: url('https://source.unsplash.com/1600x900/?store,technology') no-repeat center center fixed;
+            background-size: cover;
+            color: white;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+        }
 
-    <form th:action="@{/logout"} method="post">
-      <input type="submit" value ="Sign Out"/>
+        .container {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 50px;
+            border-radius: 20px;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            max-width: 700px;
+            z-index: 1;
+            margin-top: 100px;
+        }
 
+        h1 {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        p {
+            font-size: 1.25rem;
+            margin-bottom: 35px;
+        }
+
+        .btn-store {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 14px 35px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-store:hover {
+            background-color: #218838;
+            transform: scale(1.05);
+        }
+
+        .btn-logout {
+            background-color: #dc3545;
+        }
+
+        .btn-logout:hover {
+            background-color: #c82333;
+        }
+
+        .featured-products {
+            display: flex;
+            justify-content: center;
+            margin-top: 60px;
+            margin-bottom: 60px;
+            flex-wrap: wrap;
+        }
+
+        .featured-products .card {
+            width: 18rem;
+            margin: 15px;
+            background-color: rgba(255, 255, 255, 0.9);
+            color: #333;
+        }
+
+        .footer {
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            position: relative;
+            bottom: 0;
+            width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px;
+            }
+
+            .btn-store {
+                width: 100%;
+            }
+
+            .featured-products {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+        
+        /* Ensure modal text is black for readability */
+        .modal-title, .modal-body {
+            color: black;
+        }
+    </style>
+</head>
+<body>
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="#">Adamant Store</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+            <li class="nav-item active">
+                <a class="nav-link" href="/">Home</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/products">Products</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/logout">Logout</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<!-- Modal for session timeout warning -->
+<div class="modal fade" id="sessionTimeoutModal" tabindex="-1" aria-labelledby="sessionTimeoutModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="sessionTimeoutModalLabel">Inactivity Detected</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                You have been inactive for a while. Your session will expire in 10 seconds. Would you like to extend it?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="extendSessionBtn">Stay Logged In</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hero Section -->
+<div class="container">
+    <h1>Welcome to <span style="color: #ffc107;">SecureStore</span></h1>
+    <p>Your one-stop shop for high-quality tech products at unbeatable prices. Shop smart, shop safe.</p>
+
+    <a class="btn btn-store" href="/products">Shop Now</a>
+
+    <form action="/logout" method="get" style="display: inline;">
     </form>
-    <a class="btn btn-primary" href="/products">Products</a>
-   </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-  </body>
+</div>
+
+<!-- Featured Products -->
+<div class="featured-products">
+    <div class="card">
+        <img src="https://img.evetech.co.za/repository/ProductImages/lenovo-v15-g4-iru-13th-gen-core-i5-laptop-with-16gb-ram-and-1tb-ssd-753px-v2.webp" class="card-img-top" alt="Laptop">
+        <div class="card-body">
+            <h5 class="card-title">Premium Laptop</h5>
+            <p class="card-text">Fast, sleek, and powerful. Get yours today!</p>
+            <a href="/product/1" class="btn btn-store">View Product</a>
+        </div>
+    </div>
+    <div class="card">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTLq7R5KdYEFPcQDXg_U0VFzhxdFegw9fhVfA&s" class="card-img-top" alt="Smartphone">
+        <div class="card-body">
+            <h5 class="card-title">Smartphone</h5>
+            <p class="card-text">Top-rated smartphones for every need and budget.</p>
+            <a href="/product/2" class="btn btn-store">View Product</a>
+        </div>
+    </div>
+    <div class="card">
+        <img src="data:image/jpeg;base64,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" class="card-img-top" alt="Headphones">
+        <div class="card-body">
+            <h5 class="card-title">Noise-Canceling Headphones</h5>
+            <p class="card-text">Immerse yourself in high-quality sound.</p>
+            <a href="/product/3" class="btn btn-store">View Product</a>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<div class="footer">
+    <p>&copy; 2025 SecureStore. All rights reserved.</p>
+    <p>
+        <a href="/terms" style="color: #ffc107;">Terms of Service</a> | 
+        <a href="/privacy" style="color: #ffc107;">Privacy Policy</a> | 
+        <a href="/social" style="color: #ffc107;">Social Media</a>
+    </p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+let warningTimeout;
+let logoutTimeout;
+
+function resetTimers() {
+  clearTimeout(warningTimeout);
+  clearTimeout(logoutTimeout);
+
+  // Show warning after 15 seconds of inactivity
+  warningTimeout = setTimeout(() => {
+    const modal = new bootstrap.Modal(document.getElementById('sessionTimeoutModal'));
+    modal.show();
+
+    // Logout after 10 more seconds if no response
+    logoutTimeout = setTimeout(() => {
+      window.location.href = '/logout';
+    }, 10000);
+  }, 15000);
+}
+
+document.addEventListener('mousemove', resetTimers);
+document.addEventListener('keypress', resetTimers);
+document.addEventListener('scroll', resetTimers);
+document.addEventListener('click', resetTimers);
+
+// Handle "Extend Session"
+document.addEventListener('DOMContentLoaded', function () {
+  resetTimers();
+
+  document.getElementById('extendSessionBtn').addEventListener('click', function () {
+    resetTimers();
+    bootstrap.Modal.getInstance(document.getElementById('sessionTimeoutModal')).hide();
+  });
+});
+</script>
+</body>
 </html>
