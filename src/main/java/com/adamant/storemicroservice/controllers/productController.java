@@ -10,17 +10,22 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.adamant.storemicroservice.models.Product;
 import com.adamant.storemicroservice.models.ProductDto;
@@ -42,13 +47,14 @@ public class productController {
         return "products/index";
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/create")
     public String showCreatePage(Model model) {
-        ProductDto productDto = new ProductDto();
-        model.addAttribute("productDto", productDto);
+        model.addAttribute("productDto", new ProductDto());
         return "products/createProduct";
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/create")
     public String createProduct(
             @Valid @ModelAttribute ProductDto productDto, BindingResult result) {
@@ -100,6 +106,7 @@ public class productController {
         return "redirect:/products";
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/edit/{id}")
     public String showEditPage(
             Model model, @PathVariable int id) { // Use @PathVariable here
@@ -124,6 +131,7 @@ public class productController {
         return "products/editProducts";
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/edit/{id}")
     public String updateProduct(@PathVariable int id,
             @Valid @ModelAttribute ProductDto productDto,
@@ -182,6 +190,7 @@ public class productController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/delete")
     public String deleteProduct(@RequestParam int id) {
         try {
@@ -203,5 +212,25 @@ public class productController {
             System.out.println("Exception: " + ex.getMessage());
             return "redirect:/products";
         }
+    }
+
+    @GetMapping("/serve-image/{id}")
+    @ResponseBody
+    public byte[] serveProductImage(@PathVariable int id) {
+        Product product = repo.findById(id).orElseThrow(() -> new RuntimeException("Product not found"));
+        String fileName = product.getImageFileName();
+        try {
+            Path path = Paths.get("public/images/" + fileName);
+            return Files.readAllBytes(path);
+        } catch (Exception ex) {
+            throw new RuntimeException("Could not read image file: " + ex.getMessage(), ex);
+        }
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public String handleMaxSizeException(RedirectAttributes redirectAttrs) {
+        redirectAttrs.addFlashAttribute("errorMessage",
+                "Upload failed: file exceeds maximum allowed size of 10 MB.");
+        return "redirect:/products/create";
     }
 }

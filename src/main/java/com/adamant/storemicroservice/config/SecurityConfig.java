@@ -2,6 +2,7 @@ package com.adamant.storemicroservice.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -9,6 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 
 @Configuration
+@EnableMethodSecurity
 public class SecurityConfig {
 
     @Bean
@@ -21,13 +23,19 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/home", "/register", "/login", "/products", "/products/create", 
-                                "/products/edit/**", "/products/delete", "/js/**", "/css/**").permitAll()
+                // public resources
+                .requestMatchers("/", "/home", "/register", "/login", "/js/**", "/css/**").permitAll()
+                // product listing and buy available to all authenticated or anonymous
+                .requestMatchers("/products", "/products/", "/products/list").permitAll()
+                // only ADMIN may create, edit, delete
+                .requestMatchers("/products/create", "/products/edit/**", "/products/delete").hasRole("ADMIN")
+                // any other request requires authentication
+                .requestMatchers("/products/serve-image/**").permitAll()
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
                 .loginPage("/login")
-                .defaultSuccessUrl("/index.html?loginSuccess=true", true)
+                .defaultSuccessUrl("/products", true)
                 .permitAll()
             )
             .logout(logout -> logout
@@ -38,7 +46,7 @@ public class SecurityConfig {
                 .permitAll()
             )
             .sessionManagement(session -> session
-                .invalidSessionUrl("/login?expired=true")  // Custom expired session URL
+                .invalidSessionUrl("/login?expired=true")
                 .maximumSessions(1)
                 .expiredUrl("/login?expired=true")
                 .and()
