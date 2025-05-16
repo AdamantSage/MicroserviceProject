@@ -35,7 +35,7 @@ public class UserController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @GetMapping({ "", "/login" })
+    @GetMapping("/login")
     public String showLoginPage() {
         logger.debug("Showing login page");
         return "users/sign-up";

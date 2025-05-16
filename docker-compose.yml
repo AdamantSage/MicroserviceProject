@@ -1,0 +1,30 @@
+version: "3.8"
+services:
+  mysql:
+    image: mysql:8
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: stackmasters
+      MYSQL_DATABASE: storemsdb
+    ports:
+      - "3307:3306"
+    networks:
+      - mynetwork
+
+  storemicroservice:
+    build: .
+    container_name: storemicroservice
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+    networks:
+      - mynetwork
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/storemsdb
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: stackmasters
+
+networks:
+  mynetwork:
